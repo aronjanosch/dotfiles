@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 
+# Warn that some commands will not be run if the script is not run as root.
+if [[ $EUID -ne 0 ]]; then
+  RUN_AS_ROOT=false
+  printf "Certain commands will not be run without sudo privileges. To run as root, run the same command prepended with 'sudo', for example: $ sudo $0\n\n" | fold -s -w 80
+else
+  RUN_AS_ROOT=true
+  # Update existing `sudo` timestamp until `.osx` has finished
+  while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+fi
+
 # Set a blazingly fast keyboard repeat rate, and make it happen more quickly.
 # (The KeyRepeat option requires logging out and back in to take effect.)
 defaults write NSGlobalDomain InitialKeyRepeat -int 20
@@ -11,3 +21,5 @@ defaults write NSGlobalDomain AppleShowAllExtensions -bool true
 # Use column view in all Finder windows by default
 # Four-letter codes for the other view modes: `icnv`, `Nlsv`, `clmv`, `Flwv`
 defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
+
+printf "Please log out and log back in to make all settings take effect.\n"
